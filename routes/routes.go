@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/skandansn/webDevBankBackend/controller"
 	accountController "github.com/skandansn/webDevBankBackend/controller/account"
 	appointmentController "github.com/skandansn/webDevBankBackend/controller/appointment"
 	"github.com/skandansn/webDevBankBackend/controller/auth"
@@ -8,6 +9,7 @@ import (
 	customerController "github.com/skandansn/webDevBankBackend/controller/customer"
 	employeeController "github.com/skandansn/webDevBankBackend/controller/employee"
 	transactionController "github.com/skandansn/webDevBankBackend/controller/transaction"
+	"github.com/skandansn/webDevBankBackend/service"
 	accountService "github.com/skandansn/webDevBankBackend/service/account"
 	appointmentService "github.com/skandansn/webDevBankBackend/service/appointment"
 	cardService "github.com/skandansn/webDevBankBackend/service/card"
@@ -39,6 +41,9 @@ var (
 
 	transactionServiceInstance    = transactionService.NewTransactionService()
 	transactionControllerInstance = transactionController.NewTransactionController(transactionServiceInstance)
+
+	companyBranchLocationServiceInstance    = service.NewCompanyBranchLocationService()
+	companyBranchLocationControllerInstance = controller.NewCompanyBranchLocationController(companyBranchLocationServiceInstance)
 )
 
 var Routes = []Route{
@@ -453,6 +458,33 @@ var Routes = []Route{
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				ctx.JSON(http.StatusOK, res)
+			}
+		},
+	},
+	// branches
+	{
+		Path:   "/branches",
+		Method: http.MethodGet,
+		Tiers:  map[string]bool{"public": true, "customer": true, "employee": true, "admin": true},
+		Handler: func(ctx *gin.Context) {
+			res, err := companyBranchLocationControllerInstance.GetCompanyBranchLocations(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, res)
+			}
+		},
+	},
+	{
+		Path:   "/branches",
+		Method: http.MethodPost,
+		Tiers:  map[string]bool{"admin": true},
+		Handler: func(ctx *gin.Context) {
+			res, err := companyBranchLocationControllerInstance.SaveCompanyBranchLocation(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusCreated, res)
 			}
 		},
 	},

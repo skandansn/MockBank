@@ -55,3 +55,12 @@ func RemoveDuplicatesUint(elements []uint) []uint {
 
 	return result
 }
+
+func ParseStringAsFloat64(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		fmt.Println("Error converting string to float64:", err)
+		return 0
+	}
+	return f
+}

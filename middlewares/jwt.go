@@ -61,7 +61,7 @@ func AuthCheck() gin.HandlerFunc {
 			return
 		}
 
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		c.String(404, "Not found")
 		c.Abort()
 	}
 }

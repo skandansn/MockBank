@@ -40,7 +40,7 @@ func ConnectDataBase() {
 		fmt.Println("We are connected to the database ", Dbdriver)
 	}
 
-	DB.AutoMigrate(&Customer{}, &User{}, &Employee{}, &Access{}, &Appointment{}, &BookedAppointment{}, &BankAccount{}, &Card{}, &CardRequest{}, &Transaction{}, &BankAccountRequest{})
+	DB.AutoMigrate(&Customer{}, &User{}, &Employee{}, &Access{}, &Appointment{}, &BookedAppointment{}, &BankAccount{}, &Card{}, &CardRequest{}, &Transaction{}, &BankAccountRequest{}, &CompanyBranchLocation{})
 	DB.Model(&Customer{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
 	DB.Model(&Employee{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
 	DB.Model(&Access{}).AddForeignKey("employee_id", "employees(id)", "RESTRICT", "RESTRICT")
