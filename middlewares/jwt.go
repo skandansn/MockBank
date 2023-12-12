@@ -14,7 +14,10 @@ func AuthCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userType, userId, userTypeId, err := token.ExtractUserTypeUserTypeIdAndUserId(c)
 		currentRoute := c.Request.URL.Path
-		currentRoute = currentRoute[4:]
+
+		if strings.HasPrefix(currentRoute, "/api") {
+			currentRoute = currentRoute[4:]
+		}
 
 		supportedTiersForCurrentRoute := map[string]bool{}
 		isCurrentRoutePublic := false
