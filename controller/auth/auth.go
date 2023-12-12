@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/skandansn/webDevBankBackend/entity/appointment"
 	"github.com/skandansn/webDevBankBackend/entity/auth"
+	customerEntity "github.com/skandansn/webDevBankBackend/entity/customer"
 	"github.com/skandansn/webDevBankBackend/models"
 	"github.com/skandansn/webDevBankBackend/utils/token"
 	"net/http"
@@ -34,26 +35,26 @@ func Login(c *gin.Context) {
 
 }
 
-func Register(c *gin.Context) (models.Customer, error) {
+func Register(c *gin.Context) (customerEntity.Customer, error) {
 
 	var input auth.CustomerRegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return models.Customer{}, err
+		return customerEntity.Customer{}, err
 	}
 
 	cus, err := coreCustomerRegister(input)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return models.Customer{}, err
+		return customerEntity.Customer{}, err
 	}
 
-	return cus, nil
+	cusReturn := convertToCustomerDTO(cus)
+
+	return cusReturn, nil
 }
 
-func RegisterFromAppointment(bookAppointmentInput appointment.BookAppointmentInput) (models.Customer, error) {
+func RegisterFromAppointment(bookAppointmentInput appointment.BookAppointmentInput) (customerEntity.Customer, error) {
 
 	var input auth.CustomerRegisterInput
 
@@ -69,10 +70,10 @@ func RegisterFromAppointment(bookAppointmentInput appointment.BookAppointmentInp
 	cus, err := coreCustomerRegister(input)
 
 	if err != nil {
-		return models.Customer{}, err
+		return customerEntity.Customer{}, err
 	}
 
-	return cus, nil
+	return convertToCustomerDTO(cus), nil
 }
 
 func CurrentUser(c *gin.Context) {
@@ -134,4 +135,18 @@ func coreCustomerRegister(input auth.CustomerRegisterInput) (models.Customer, er
 	}
 
 	return cus, nil
+}
+
+func convertToCustomerDTO(dbCustomer models.Customer) customerEntity.Customer {
+	customer := customerEntity.Customer{
+		CustomerId:  dbCustomer.ID,
+		FirstName:   dbCustomer.FirstName,
+		LastName:    dbCustomer.LastName,
+		Address:     dbCustomer.Address,
+		DateOfBirth: dbCustomer.DateOfBirth,
+		Email:       dbCustomer.Email,
+		Phone:       dbCustomer.Phone,
+		UserName:    dbCustomer.UserName,
+	}
+	return customer
 }

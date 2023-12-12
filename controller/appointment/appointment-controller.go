@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/skandansn/webDevBankBackend/controller/auth"
 	"github.com/skandansn/webDevBankBackend/entity/appointment"
+	"github.com/skandansn/webDevBankBackend/models"
 	appointmentService "github.com/skandansn/webDevBankBackend/service/appointment"
 	"github.com/skandansn/webDevBankBackend/utils"
 	"log"
@@ -16,14 +17,81 @@ type AppointmentController interface {
 	CreateAppointment(ctx *gin.Context) (appointment.Appointment, error)
 	GetAppointmentById(ctx *gin.Context) (appointment.Appointment, error)
 	GetBookedAppointmentsForCustomer(ctx *gin.Context) ([]appointment.Appointment, error)
-	GetAppointmentsForEmployee(ctx *gin.Context) ([]appointment.Appointment, error)
+	GetAppointmentsForEmployee(ctx *gin.Context) ([]appointment.AppointmentWithCustomer, error)
 	ScheduleAppointment(ctx *gin.Context) (appointment.Appointment, error)
 	RescheduleAppointment(ctx *gin.Context) (appointment.Appointment, error)
 	CancelAppointment(ctx *gin.Context) error
+	AppointmentResolution(ctx *gin.Context) error
+	ScheduleJoinAccountAppointment(ctx *gin.Context) (appointment.Appointment, error)
 }
 
 type appointmentController struct {
 	service appointmentService.AppointmentService
+}
+
+func (c *appointmentController) ScheduleJoinAccountAppointment(ctx *gin.Context) (appointment.Appointment, error) {
+	var bjaai appointment.BookJointAccountAppointmentInput
+
+	if err := ctx.ShouldBindJSON(&bjaai); err != nil {
+		return appointment.Appointment{}, err
+	}
+
+	if len(bjaai.Customers) < 1 {
+		return appointment.Appointment{}, errors.New("at least two customers are required for a joint account")
+	}
+
+	custId := ctx.GetString("userTypeId")
+
+	appointmentScheduled, err := c.service.ScheduleJoinAccountAppointment(utils.ParseStringAsInt(custId), bjaai)
+
+	if err != nil {
+		return appointment.Appointment{}, err
+	}
+
+	return appointmentScheduled, nil
+}
+
+func (c *appointmentController) AppointmentResolution(ctx *gin.Context) error {
+	id := ctx.Param("id")
+
+	if id == "" {
+		return errors.New("id is required")
+	}
+
+	purpose := ctx.Param("purpose")
+
+	if purpose == "" {
+		return errors.New("purpose is required")
+	}
+
+	userType := ctx.GetString("userType")
+	userTypeId := ctx.GetString("userTypeId")
+
+	if userType != "employee" && userType != "admin" {
+		return errors.New("only employees can resolve appointments")
+	}
+
+	empId := utils.ParseStringAsInt(userTypeId)
+
+	accessFlag, err := models.IsAccessPresentForEmployee(empId, "create_customer")
+
+	if err != nil {
+		return err
+	}
+
+	if !accessFlag {
+		return errors.New("employee does not have access to resolve appointments")
+	}
+
+	idInt := utils.ParseStringAsInt(id)
+
+	err = c.service.AppointmentResolution(idInt, empId, purpose)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *appointmentController) CancelAppointment(ctx *gin.Context) error {
@@ -82,7 +150,7 @@ func (c *appointmentController) ScheduleAppointment(ctx *gin.Context) (appointme
 		if err != nil {
 			return appointment.Appointment{}, err
 		} else {
-			ba.CustomerId = &customer.ID
+			ba.CustomerId = &customer.CustomerId
 		}
 	}
 
@@ -95,7 +163,7 @@ func (c *appointmentController) ScheduleAppointment(ctx *gin.Context) (appointme
 	return a, nil
 }
 
-func (c *appointmentController) GetAppointmentsForEmployee(ctx *gin.Context) ([]appointment.Appointment, error) {
+func (c *appointmentController) GetAppointmentsForEmployee(ctx *gin.Context) ([]appointment.AppointmentWithCustomer, error) {
 	userTypeId := ctx.GetString("userTypeId")
 
 	employeeId := utils.ParseStringAsInt(userTypeId)
@@ -103,7 +171,7 @@ func (c *appointmentController) GetAppointmentsForEmployee(ctx *gin.Context) ([]
 	appointments, err := c.service.GetAppointmentsForEmployee(employeeId)
 
 	if err != nil {
-		return []appointment.Appointment{}, err
+		return []appointment.AppointmentWithCustomer{}, err
 	}
 
 	return appointments, nil

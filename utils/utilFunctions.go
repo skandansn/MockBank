@@ -40,3 +40,18 @@ func GenerateCardExpiry() string {
 func GetCurrentDate() string {
 	return time.Now().Format("2006-01-02")
 }
+
+func RemoveDuplicatesUint(elements []uint) []uint {
+	encountered := map[uint]bool{}
+	result := []uint{}
+
+	for v := range elements {
+		if encountered[elements[v]] == true {
+		} else {
+			encountered[elements[v]] = true
+			result = append(result, elements[v])
+		}
+	}
+
+	return result
+}

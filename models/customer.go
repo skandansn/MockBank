@@ -12,10 +12,22 @@ type Customer struct {
 	UserID      uint   `gorm:"not null" json:"user_id"`
 	User        User   `gorm:"foreignKey:UserID"`
 	UserName    string `gorm:"size:255;not null;unique" json:"username"`
-	Email       string `gorm:"size:255;not null;" json:"email" binding:"required, email"`
-	Phone       string `gorm:"size:255;not null;" json:"phone" binding:"required"`
+	Email       string `gorm:"size:255;not null;unique" json:"email" binding:"required, email"`
+	Phone       string `gorm:"size:255;not null;unique" json:"phone" binding:"required"`
 	DateOfBirth string `gorm:"size:255;not null;" json:"dateOfBirth" binding:"required"`
 	Address     string `gorm:"size:255;not null;" json:"address" binding:"required"`
+}
+
+func GetCustomerByEmailPhoneAndName(email string, phone string, firstName string, lastName string) (Customer, error) {
+
+	var c Customer
+
+	err := DB.Where("email = ? AND phone = ? AND first_name = ? AND last_name = ?", email, phone, firstName, lastName).First(&c).Error
+	if err != nil {
+		return Customer{}, errors.New("customer not found")
+	}
+
+	return c, nil
 }
 
 func GetCustomerByUserID(cid uint) (Customer, error) {

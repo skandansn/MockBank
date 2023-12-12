@@ -19,9 +19,14 @@ type Customer struct {
 	Cards    []card.Card           `gorm:"foreignKey:CustomerId" json:"cards"`
 }
 
+type CreateCustomerAccountInput struct {
+	AccountType    string  `gorm:"size:255;not null;" json:"accountType" binding:"required"`
+	AccountBalance float64 `gorm:"size:255;not null;" json:"accountBalance" binding:"required"`
+}
+
 type CreateCustomerInput struct {
-	CustomerId    uint   `gorm:"primary_key;auto_increment" json:"customerId" binding:"required"`
-	AccountType   string `gorm:"size:255;not null;" json:"accountType" binding:"required"`
-	CardNetwork   string `gorm:"size:255;not null;" json:"cardNetwork" binding:"required"`
-	AppointmentId uint   `gorm:"size:255;not null;" json:"appointmentId" binding:"required"`
+	CustomerId    uint                         `gorm:"primary_key;auto_increment" json:"customerId" binding:"required"`
+	Accounts      []CreateCustomerAccountInput `gorm:"foreignKey:CustomerId" json:"accounts"`
+	CardNetwork   string                       `gorm:"size:255;not null;" json:"cardNetwork" binding:"required"`
+	AppointmentId uint                         `gorm:"size:255;not null;" json:"appointmentId" binding:"required"`
 }

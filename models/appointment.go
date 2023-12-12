@@ -21,6 +21,36 @@ type BookedAppointment struct {
 	AppointmentID uint        `gorm:"not null" json:"appointment_id"`
 	Appointment   Appointment `gorm:"" json:"appointment"`
 	Status        string      `gorm:"size:255;not null;" json:"status"`
+	Purpose       string      `gorm:"size:255;not null;" json:"purpose"`
+}
+
+func ResolveQueryAppointment(id uint, employeeId uint) (Appointment, error) {
+
+	var a Appointment
+
+	if err := DB.Where("id = ? AND employee_id = ? AND status = ?", id, employeeId, "Scheduled").First(&a).Error; err != nil {
+		return a, err
+	}
+
+	a.Status = "Completed"
+
+	err := DB.Save(&a).Error
+
+	if err != nil {
+		return a, err
+	}
+
+	var ba BookedAppointment
+
+	if err := DB.Where("appointment_id = ?", id).First(&ba).Error; err != nil {
+		return a, err
+	}
+
+	ba.Status = "Completed"
+
+	err = DB.Save(&ba).Error
+
+	return a, nil
 }
 
 func GetAvailableAppointmentsForDate(date string) ([]Appointment, error) {
@@ -42,6 +72,17 @@ func CreateAppointment(a Appointment) (Appointment, error) {
 	}
 
 	return a, nil
+}
+
+func GetLatestBookedAppointmentByAppointmentIdPurposeAndCustomerId(appointmentId uint, purpose string, customerId *uint) (BookedAppointment, error) {
+
+	var ba BookedAppointment
+
+	if err := DB.Where("appointment_id = ? AND purpose = ? AND customer_id = ?", appointmentId, purpose, customerId).Last(&ba).Error; err != nil {
+		return ba, err
+	}
+
+	return ba, nil
 }
 
 func GetAppointmentById(id uint) (Appointment, error) {
@@ -95,6 +136,7 @@ func ScheduleAppointment(a Appointment) (Appointment, error) {
 		CustomerID:    *a.CustomerID,
 		AppointmentID: a.ID,
 		Status:        "Scheduled",
+		Purpose:       a.Description,
 	}
 
 	err := DB.Create(&ba).Error
@@ -104,6 +146,7 @@ func ScheduleAppointment(a Appointment) (Appointment, error) {
 
 	a.Status = "Scheduled"
 	a.CustomerID = &ba.CustomerID
+	a.Description = ba.Purpose
 	err = DB.Save(&a).Error
 
 	if err != nil {

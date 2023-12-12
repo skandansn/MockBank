@@ -221,9 +221,22 @@ var Routes = []Route{
 	{
 		Path:   "/bookAppointment",
 		Method: http.MethodPost,
-		Tiers:  map[string]bool{"customer": true},
+		Tiers:  map[string]bool{"customer": true, "public": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := appointmentControllerInstance.ScheduleAppointment(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(201, res)
+			}
+		},
+	},
+	{
+		Path:   "/bookJoinAccountAppointment",
+		Method: http.MethodPost,
+		Tiers:  map[string]bool{"customer": true},
+		Handler: func(ctx *gin.Context) {
+			res, err := appointmentControllerInstance.ScheduleJoinAccountAppointment(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
@@ -254,6 +267,19 @@ var Routes = []Route{
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				ctx.JSON(200, "Appointment cancelled")
+			}
+		},
+	},
+	{
+		Path:   "/employee/appointmentResolution/:purpose/:id",
+		Method: http.MethodPost,
+		Tiers:  map[string]bool{"employee": true},
+		Handler: func(ctx *gin.Context) {
+			err := appointmentControllerInstance.AppointmentResolution(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(200, "Appointment resolved")
 			}
 		},
 	},

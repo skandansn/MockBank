@@ -13,6 +13,36 @@ type BankAccount struct {
 	AccountBalance float64 `gorm:"size:255;not null;" json:"accountBalance" binding:"required"`
 }
 
+type BankAccountRequest struct {
+	gorm.Model
+	CustomerIDs         string `gorm:"type:json" json:"customer_ids" binding:"required"`
+	AccountType         string `gorm:"size:255;not null;" json:"accountType" binding:"required"`
+	Status              string `gorm:"size:255;not null;" json:"status" binding:"required"`
+	Reason              string `gorm:"size:255;" json:"reason"`
+	BookedAppointmentId uint   `gorm:"" json:"bookedAppointmentId"`
+}
+
+func GetBankAccountRequestByBookedAppointmentId(bid uint) (BankAccountRequest, error) {
+
+	var b BankAccountRequest
+
+	if err := DB.Where("booked_appointment_id = ?", bid).First(&b).Error; err != nil {
+		return b, err
+	}
+
+	return b, nil
+}
+
+func CreateBankAccountRequest(b BankAccountRequest) (BankAccountRequest, error) {
+
+	err := DB.Create(&b).Error
+	if err != nil {
+		return BankAccountRequest{}, err
+	}
+
+	return b, nil
+}
+
 func CreateBankAccount(account BankAccount) (BankAccount, error) {
 
 	err := DB.Create(&account).Error
@@ -21,6 +51,26 @@ func CreateBankAccount(account BankAccount) (BankAccount, error) {
 	}
 
 	return account, nil
+}
+
+func UpdateBankAccountRequestStatus(bid uint, status string, reason string) (BankAccountRequest, error) {
+
+	var b BankAccountRequest
+
+	if err := DB.Where("id = ?", bid).First(&b).Error; err != nil {
+		return b, err
+	}
+
+	b.Status = status
+	b.Reason = reason
+
+	err := DB.Save(&b).Error
+
+	if err != nil {
+		return b, err
+	}
+
+	return b, nil
 }
 
 func GetBankAccountsByCustomerId(cid uint) ([]BankAccount, error) {

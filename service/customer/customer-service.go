@@ -59,41 +59,45 @@ func (c *customerService) CreateCustomer(ctx *gin.Context) (customerEntity.Custo
 		return customerEntity.Customer{}, errors.New("could not mark appointment as completed")
 	}
 
-	dbBankAccount := models.BankAccount{
-		CustomerID:     customerId,
-		AccountBalance: 0,
-		AccountNumber:  utils.GenerateRandomNumberString(10),
-		AccountType:    input.AccountType,
-	}
-
-	dbBankAccount, err = models.CreateBankAccount(dbBankAccount)
-
-	if err != nil {
-		return customerEntity.Customer{}, errors.New("could not create bank account")
-	}
-
 	customer, err := models.GetCustomerById(customerId)
 
 	if err != nil {
 		return customerEntity.Customer{}, errors.New("could not find customer")
 	}
 
-	dbCard := models.Card{
-		CustomerID:        customerId,
-		CardNumber:        utils.GenerateRandomNumberString(16),
-		CardType:          "Debit",
-		CardNetwork:       input.CardNetwork,
-		CardCvv:           utils.GenerateRandomNumberString(3),
-		CardExpiry:        utils.GenerateCardExpiry(),
-		CardName:          "Debit Card",
-		CardHolderName:    customer.FirstName + " " + customer.LastName,
-		CardLinkedAccount: dbBankAccount.AccountNumber,
-	}
+	for _, account := range input.Accounts {
+		dbBankAccount := models.BankAccount{
+			CustomerID:     customerId,
+			AccountBalance: account.AccountBalance,
+			AccountNumber:  utils.GenerateRandomNumberString(10),
+			AccountType:    account.AccountType,
+		}
 
-	dbCard, err = models.CreateCard(dbCard)
+		dbBankAccount, err = models.CreateBankAccount(dbBankAccount)
 
-	if err != nil {
-		return customerEntity.Customer{}, errors.New("could not create card")
+		if dbBankAccount.AccountType == "Savings" {
+			dbCard := models.Card{
+				CustomerID:        customerId,
+				CardNumber:        utils.GenerateRandomNumberString(16),
+				CardType:          "Debit",
+				CardNetwork:       input.CardNetwork,
+				CardCvv:           utils.GenerateRandomNumberString(3),
+				CardExpiry:        utils.GenerateCardExpiry(),
+				CardName:          "Debit Card",
+				CardHolderName:    customer.FirstName + " " + customer.LastName,
+				CardLinkedAccount: dbBankAccount.AccountNumber,
+			}
+
+			dbCard, err = models.CreateCard(dbCard)
+
+			if err != nil {
+				return customerEntity.Customer{}, errors.New("could not create card")
+			}
+		}
+
+		if err != nil {
+			return customerEntity.Customer{}, errors.New("could not create bank account")
+		}
 	}
 
 	customerDTO := convertToCustomerDTO(customer)
