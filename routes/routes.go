@@ -385,7 +385,7 @@ var Routes = []Route{
 	{
 		Path:   "/viewCardRequests",
 		Method: http.MethodGet,
-		Tiers:  map[string]bool{"employee": true},
+		Tiers:  map[string]bool{"employee": true, "customer": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := cardControllerInstance.GetPendingCardRequests(ctx)
 			if err != nil {

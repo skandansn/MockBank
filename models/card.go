@@ -72,6 +72,17 @@ func GetPendingCardRequests() ([]CardRequest, error) {
 	return c, nil
 }
 
+func GetPendingCardRequestsForCustomer(cid uint) ([]CardRequest, error) {
+
+	var c []CardRequest
+
+	if err := DB.Where("status = ? AND customer_id = ?", "pending", cid).Find(&c).Error; err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
 func UpdateCardRequestStatus(cid uint, status string, reason string) (CardRequest, error) {
 
 	var c CardRequest

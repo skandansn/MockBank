@@ -67,6 +67,25 @@ func (c cardService) ApproveOrRejectCardRequest(ctx *gin.Context) (card.CardRequ
 
 func (c cardService) GetPendingCardRequests(ctx *gin.Context) ([]card.CardRequest, error) {
 
+	isUserCustomer := ctx.GetString("userType") == "customer"
+
+	if isUserCustomer {
+		custId := utils.ParseStringAsInt(ctx.GetString("userTypeId"))
+
+		res, err := models.GetPendingCardRequestsForCustomer(custId)
+
+		if err != nil {
+			return []card.CardRequest{}, errors.New("error getting pending card requests")
+		}
+
+		cardRequests := []card.CardRequest{}
+		for _, cardReq := range res {
+			cardRequests = append(cardRequests, convertToCardRequestDTO(cardReq))
+		}
+
+		return cardRequests, nil
+	}
+
 	err := cardRequestPermissionCheck(ctx)
 	if err != nil {
 		return []card.CardRequest{}, err
