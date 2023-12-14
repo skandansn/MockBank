@@ -167,7 +167,7 @@ var Routes = []Route{
 	{
 		Path:   "/customer",
 		Method: http.MethodGet,
-		Tiers:  map[string]bool{"admin": true, "employee": true, "customer": true},
+		Tiers:  map[string]bool{"employee": true, "customer": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := customerControllerInstance.GetCustomerDetails(ctx)
 			if err != nil {
@@ -180,7 +180,7 @@ var Routes = []Route{
 	{
 		Path:   "/customers",
 		Method: http.MethodGet,
-		Tiers:  map[string]bool{"admin": true, "employee": true},
+		Tiers:  map[string]bool{"employee": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := customerControllerInstance.GetAllCustomers(ctx)
 			if err != nil {
@@ -193,7 +193,7 @@ var Routes = []Route{
 	{
 		Path:   "/updateProfile",
 		Method: http.MethodPut,
-		Tiers:  map[string]bool{"admin": true, "employee": true, "customer": true},
+		Tiers:  map[string]bool{"customer": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := customerControllerInstance.UpdateProfile(ctx)
 			if err != nil {
@@ -226,7 +226,7 @@ var Routes = []Route{
 	{
 		Path:   "/appointments",
 		Method: http.MethodPost,
-		Tiers:  map[string]bool{"admin": true, "employee": true},
+		Tiers:  map[string]bool{"employee": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := appointmentControllerInstance.CreateAppointment(ctx)
 			if err != nil {
@@ -344,7 +344,7 @@ var Routes = []Route{
 	{
 		Path:   "/createCustomer",
 		Method: http.MethodPost,
-		Tiers:  map[string]bool{"admin": true, "employee": true},
+		Tiers:  map[string]bool{"employee": true},
 		Handler: func(ctx *gin.Context) {
 			res, err := customerControllerInstance.CreateCustomer(ctx)
 			if err != nil {
