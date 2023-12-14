@@ -7,7 +7,6 @@ import (
 	customerEntity "github.com/skandansn/webDevBankBackend/entity/customer"
 	"github.com/skandansn/webDevBankBackend/models"
 	"github.com/skandansn/webDevBankBackend/utils"
-	"log"
 )
 
 type AppointmentService interface {
@@ -39,16 +38,6 @@ func (a *appointmentService) ScheduleJoinAccountAppointment(customerInitiated ui
 		return appointment.Appointment{}, errors.New("appointment is not available")
 	}
 
-	dbAppointment.CustomerID = &customerInitiated
-	dbAppointment.Status = "Scheduled"
-	dbAppointment.Description = "Joint Account Creation"
-
-	dbAppointment, err = models.ScheduleAppointment(dbAppointment)
-
-	if err != nil {
-		return appointment.Appointment{}, err
-	}
-
 	customerIds := []uint{}
 
 	for _, customer := range bookAppointment.Customers {
@@ -61,17 +50,23 @@ func (a *appointmentService) ScheduleJoinAccountAppointment(customerInitiated ui
 		customerIds = append(customerIds, dbCustomer.ID)
 	}
 
-	log.Println(customerIds)
-
 	customerIds = append(customerIds, customerInitiated)
 
 	customerIds = utils.RemoveDuplicatesUint(customerIds)
 
-	log.Println(customerIds)
-
 	customerIdsJson, err := json.Marshal(customerIds)
 	if err != nil {
 		return appointment.Appointment{}, errors.New("failed to convert customer IDs to JSON")
+	}
+
+	dbAppointment.CustomerID = &customerInitiated
+	dbAppointment.Status = "Scheduled"
+	dbAppointment.Description = "Joint Account Creation"
+
+	dbAppointment, err = models.ScheduleAppointment(dbAppointment)
+
+	if err != nil {
+		return appointment.Appointment{}, err
 	}
 
 	bookedAppointment, err := models.GetLatestBookedAppointmentByAppointmentIdPurposeAndCustomerId(bookAppointment.AppointmentID, "Joint Account Creation", &customerInitiated)

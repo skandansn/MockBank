@@ -271,6 +271,7 @@ func ConvertToCardDTO(dbCards []models.Card) []card.Card {
 			CardName:          dbCard.CardName,
 			CardHolderName:    dbCard.CardHolderName,
 			CardLinkedAccount: dbCard.CardLinkedAccount,
+			CardLimit: 		   dbCard.CardLimit,
 			CustomerId:        dbCard.CustomerID,
 		}
 		cards = append(cards, card)
