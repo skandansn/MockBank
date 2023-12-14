@@ -42,6 +42,12 @@ func (c cardService) ApproveOrRejectCardRequest(ctx *gin.Context) (card.CardRequ
 		return card.CardRequest{}, err
 	}
 
+	dbCustomer, err := models.GetCustomerById(cardReqDb.CustomerID)
+
+	if err != nil {
+		return card.CardRequest{}, errors.New("error getting customer")
+	}
+
 	if cardReqDecision.Decision == "approved" {
 		cardDb := models.Card{
 			CustomerID:        cardReqDb.CustomerID,
@@ -51,7 +57,7 @@ func (c cardService) ApproveOrRejectCardRequest(ctx *gin.Context) (card.CardRequ
 			CardCvv:           utils.GenerateRandomNumberString(3),
 			CardExpiry:        utils.GenerateCardExpiry(),
 			CardName:          cardReqDb.CardName,
-			CardHolderName:    cardReqDb.CardName,
+			CardHolderName:    dbCustomer.FirstName + " " + dbCustomer.LastName,
 			CardLimit:         cardReqDb.CardLimit,
 			CardLinkedAccount: "",
 		}
