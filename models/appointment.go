@@ -160,6 +160,7 @@ func RescheduleAppointment(old Appointment, new Appointment) (Appointment, error
 
 	old.Status = "Available"
 	old.CustomerID = nil
+	old.Description = ""
 	err := DB.Save(&old).Error
 
 	if err != nil {
@@ -183,6 +184,7 @@ func RescheduleAppointment(old Appointment, new Appointment) (Appointment, error
 
 	new.Status = "Scheduled"
 	new.CustomerID = &oldBooked.CustomerID
+	new.Description = oldBooked.Purpose
 	err = DB.Save(&new).Error
 	if err != nil {
 		return Appointment{}, err
@@ -193,6 +195,7 @@ func RescheduleAppointment(old Appointment, new Appointment) (Appointment, error
 		CustomerID:    *new.CustomerID,
 		AppointmentID: new.ID,
 		Status:        "Scheduled",
+		Purpose:       new.Description,
 	}
 
 	err = DB.Create(&newBooked).Error
@@ -216,6 +219,7 @@ func CancelAppointmentByCustIdAndAppointmentId(custId uint, id uint) (Appointmen
 
 	a.Status = "Available"
 	a.CustomerID = nil
+	a.Description = ""
 
 	err = DB.Save(&a).Error
 

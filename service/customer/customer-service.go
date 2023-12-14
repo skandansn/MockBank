@@ -76,7 +76,7 @@ func (c *customerService) CreateCustomer(ctx *gin.Context) (customerEntity.Custo
 
 		dbBankAccount, err = models.CreateBankAccount(dbBankAccount)
 
-		if dbBankAccount.AccountType == "Savings" {
+		if dbBankAccount.AccountType == "Checking" {
 			dbCard := models.Card{
 				CustomerID:        customerId,
 				CardNumber:        utils.GenerateRandomNumberString(16),
