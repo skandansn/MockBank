@@ -167,7 +167,7 @@ func RescheduleAppointment(old Appointment, new Appointment) (Appointment, error
 	}
 
 	oldBooked := BookedAppointment{}
-	err = DB.Where("appointment_id = ?", old.ID).First(&oldBooked).Error
+	err = DB.Where("appointment_id = ? AND status = ?", old.ID, "Scheduled").First(&oldBooked).Error
 
 	if err != nil {
 		return Appointment{}, err
