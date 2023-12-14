@@ -12,6 +12,7 @@ import (
 
 type CustomerService interface {
 	GetCustomerDetails(ctx *gin.Context) (customerEntity.Customer, error)
+	GetAllCustomers(ctx *gin.Context) ([]customerEntity.Customer, error)
 	UpdateProfile(ctx *gin.Context, customer customerEntity.Customer) (customerEntity.Customer, error)
 	CreateCustomer(ctx *gin.Context) (customerEntity.Customer, error)
 }
@@ -109,6 +110,40 @@ func (c *customerService) CreateCustomer(ctx *gin.Context) (customerEntity.Custo
 	}
 
 	return customerDTO, nil
+}
+
+func (c *customerService) GetAllCustomers(ctx *gin.Context) ([]customerEntity.Customer, error) {
+
+	empId := ctx.MustGet("userTypeId").(string)
+
+	employeeAccess, err := models.IsAccessPresentForEmployee(utils.ParseStringAsInt(empId), "view_customer_details")
+
+	if err != nil {
+		return []customerEntity.Customer{}, errors.New("employee does not have access to view all customers")
+	}
+
+	if !employeeAccess {
+		return []customerEntity.Customer{}, errors.New("employee does not have access to view all customers")
+	}
+
+	dbCustomers, err := models.GetAllCustomers()
+
+	if err != nil {
+		return []customerEntity.Customer{}, errors.New("could not get all customers")
+	}
+
+	var customers []customerEntity.Customer
+
+	for _, dbCustomer := range dbCustomers {
+		customer := convertToCustomerDTO(dbCustomer)
+		customer, err = getCardAndAccountDetails(customer)
+		if err != nil {
+			return []customerEntity.Customer{}, errors.New("could not get card and account details")
+		}
+		customers = append(customers, customer)
+	}
+
+	return customers, nil
 }
 
 func (c *customerService) GetCustomerDetails(ctx *gin.Context) (customerEntity.Customer, error) {

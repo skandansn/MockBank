@@ -178,6 +178,19 @@ var Routes = []Route{
 		},
 	},
 	{
+		Path:   "/customers",
+		Method: http.MethodGet,
+		Tiers:  map[string]bool{"admin": true, "employee": true},
+		Handler: func(ctx *gin.Context) {
+			res, err := customerControllerInstance.GetAllCustomers(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, res)
+			}
+		},
+	},
+	{
 		Path:   "/updateProfile",
 		Method: http.MethodPut,
 		Tiers:  map[string]bool{"admin": true, "employee": true, "customer": true},

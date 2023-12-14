@@ -55,6 +55,17 @@ func GetCustomerById(id uint) (Customer, error) {
 	return c, nil
 }
 
+func GetAllCustomers() ([]Customer, error) {
+
+	var c []Customer
+
+	if err := DB.Find(&c).Error; err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
 func (c *Customer) SaveCustomer() (*Customer, error) {
 
 	var err error

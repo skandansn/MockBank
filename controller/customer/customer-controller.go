@@ -8,6 +8,7 @@ import (
 
 type CustomerController interface {
 	GetCustomerDetails(ctx *gin.Context) (customerEntity.Customer, error)
+	GetAllCustomers(ctx *gin.Context) ([]customerEntity.Customer, error)
 	UpdateProfile(ctx *gin.Context) (customerEntity.Customer, error)
 	CreateCustomer(ctx *gin.Context) (customerEntity.Customer, error)
 }
@@ -28,6 +29,14 @@ func (c *customerController) GetCustomerDetails(ctx *gin.Context) (customerEntit
 	res, err := c.service.GetCustomerDetails(ctx)
 	if err != nil {
 		return customerEntity.Customer{}, err
+	}
+	return res, nil
+}
+
+func (c *customerController) GetAllCustomers(ctx *gin.Context) ([]customerEntity.Customer, error) {
+	res, err := c.service.GetAllCustomers(ctx)
+	if err != nil {
+		return []customerEntity.Customer{}, err
 	}
 	return res, nil
 }
