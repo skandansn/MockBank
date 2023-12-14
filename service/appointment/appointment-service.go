@@ -401,24 +401,26 @@ func convertToAppointmentWithCustomerDTO(dbAppointment models.Appointment) appoi
 		Customer:    customerEntity.Customer{},
 	}
 
-	dbCustomer, err := models.GetCustomerById(*dbAppointment.CustomerID)
+	if dbAppointment.CustomerID != nil {
+		dbCustomer, err := models.GetCustomerById(*dbAppointment.CustomerID)
 
-	if err != nil {
-		return appointmentDTO
+		if err != nil {
+			return appointmentDTO
+		}
+	
+		customerDTO := customerEntity.Customer{
+			CustomerId:  dbCustomer.ID,
+			FirstName:   dbCustomer.FirstName,
+			LastName:    dbCustomer.LastName,
+			Address:     dbCustomer.Address,
+			DateOfBirth: dbCustomer.DateOfBirth,
+			Email:       dbCustomer.Email,
+			Phone:       dbCustomer.Phone,
+			UserName:    dbCustomer.UserName,
+		}
+	
+		appointmentDTO.Customer = customerDTO
 	}
-
-	customerDTO := customerEntity.Customer{
-		CustomerId:  dbCustomer.ID,
-		FirstName:   dbCustomer.FirstName,
-		LastName:    dbCustomer.LastName,
-		Address:     dbCustomer.Address,
-		DateOfBirth: dbCustomer.DateOfBirth,
-		Email:       dbCustomer.Email,
-		Phone:       dbCustomer.Phone,
-		UserName:    dbCustomer.UserName,
-	}
-
-	appointmentDTO.Customer = customerDTO
 
 	return appointmentDTO
 }
