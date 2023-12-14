@@ -6,12 +6,13 @@ import (
 )
 
 type AvailableAppointment struct {
-	ID        uint   `gorm:"primary_key;auto_increment" json:"id"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
-	Date      string `json:"date"`
-	Branch    string `json:"branch"`
-	Status    string `json:"status"`
+	ID           uint   `gorm:"primary_key;auto_increment" json:"id"`
+	StartTime    string `json:"startTime"`
+	EndTime      string `json:"endTime"`
+	Date         string `json:"date"`
+	Branch       string `json:"branch"`
+	Status       string `json:"status"`
+	EmployeeName string `json:"employeeName"`
 }
 
 type Appointment struct {

@@ -337,13 +337,23 @@ func convertToAvailableAppointmentDTO(dbAppointments []models.Appointment) []app
 	var availableAppointments []appointment.AvailableAppointment
 
 	for _, dbAvailableAppointment := range dbAppointments {
+		employeeNameConcat := ""
+		fName, lName, err := models.GetEmployeeFirstNameAndLastNameById(dbAvailableAppointment.EmployeeID)
+
+		if err != nil {
+			employeeNameConcat = "Employee not found"
+		} else {
+			employeeNameConcat = fName + " " + lName
+		}
+
 		availableAppointment := appointment.AvailableAppointment{
-			StartTime: dbAvailableAppointment.StartTime,
-			EndTime:   dbAvailableAppointment.EndTime,
-			Date:      dbAvailableAppointment.Date,
-			Branch:    dbAvailableAppointment.Branch,
-			Status:    dbAvailableAppointment.Status,
-			ID:        dbAvailableAppointment.ID,
+			StartTime:    dbAvailableAppointment.StartTime,
+			EndTime:      dbAvailableAppointment.EndTime,
+			Date:         dbAvailableAppointment.Date,
+			Branch:       dbAvailableAppointment.Branch,
+			Status:       dbAvailableAppointment.Status,
+			ID:           dbAvailableAppointment.ID,
+			EmployeeName: employeeNameConcat,
 		}
 
 		availableAppointments = append(availableAppointments, availableAppointment)
@@ -402,7 +412,7 @@ func convertToAppointmentWithCustomerDTO(dbAppointment models.Appointment) appoi
 		if err != nil {
 			return appointmentDTO
 		}
-	
+
 		customerDTO := customerEntity.Customer{
 			CustomerId:  dbCustomer.ID,
 			FirstName:   dbCustomer.FirstName,
@@ -413,7 +423,7 @@ func convertToAppointmentWithCustomerDTO(dbAppointment models.Appointment) appoi
 			Phone:       dbCustomer.Phone,
 			UserName:    dbCustomer.UserName,
 		}
-	
+
 		appointmentDTO.Customer = customerDTO
 	}
 

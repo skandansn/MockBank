@@ -50,6 +50,18 @@ func GetEmployeeById(eid uint) (Employee, error) {
 
 }
 
+func GetEmployeeFirstNameAndLastNameById(eid uint) (string, string, error) {
+
+	var e Employee
+
+	if err := DB.First(&e, eid).Error; err != nil {
+
+		return "", "", errors.New("Employee not found!")
+	}
+
+	return e.FirstName, e.LastName, nil
+}
+
 func SaveEmployee(employee Employee) (*Employee, error) {
 
 	var err error
